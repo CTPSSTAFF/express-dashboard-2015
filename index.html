@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>CMP 2015 Arterial Highway Performance Dashboard</title>
+	
+	<link rel="stylesheet" href="../../libs/jqueryui/jquery-ui-1.10.4/css/cupertino/jquery-ui-1.10.4.custom.min.css"/>
+	<link rel="stylesheet" href="cmpArtAppExt.css"/>
+	
+	<script src="modernizr-2.8.2-custom.min.js"></script>
+	<script src="../../libs/jquery/jquery-1.11.1/jquery-1.11.1.min.js"></script>
+	<script src="../../libs/jqueryui/jquery-ui-1.10.4/js/jquery-ui-1.10.4.custom.min.js"></script>
+	<script src="../../libs/accessibleGrid/accessibleGrid.js"></script>  
+	<script src="../../libs/d3/d3-4.8.0/d3.js"></script>
+	<script src="../../libs/d3-tip/d3-tip-d3v4/index.js"></script>
+	<script src="CMP_Arterial_Routes.js"></script> 
+	<script src="CMP_Arterial_Themes.js"></script>
+	<script src="../../libs/openlayers/Openlayers-4.2.0/build/ol.js"></script>
+	<link rel="stylesheet" href="http://openlayers.org/en/latest/css/ol.css" type="text/css">
+	<script src="../../libs/proj4js/proj4js-2.4.3/dist/proj4-src.js"></script>
+	
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-39489988-1']);
+		_gaq.push(['_setDomainName', 'ctps.org']);
+		_gaq.push(['_setAllowLinker', true]);
+		_gaq.push(['_trackPageview']);
+	 
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>	
+	
+	<script src="cmpArtAppExt.js"></script>  
+</head>
+<body>
+<p>
+	<div id="block-blue">
+	<img src="images/mpologo.png" alt="Boston Region MPO Logo" title="Boston Region MPO Logo">
+	</div>
+	<div id="block-right">
+			<h1>2015 Arterial Highway Performance Dashboard</h1>
+			<span id="radio_span_1">
+				<input type="radio" name="select_main_view" id="display_overview" class="main_display_choice_class" value="regional" checked="true">
+					<label for="display_overview">Regional Overview Map</label>
+				<input type="radio" name="select_main_view" id="display_detail" class="main_display_choice_class" value="by_route">
+					<label for="display_detail">Data by Route</label>
+			</span>
+			
+			<input type="button" id="reset_button" class="button_class" value="Reset Application"></input>
+			<span class="spanForButtonWithLink">
+				<input type="button" id="download_button" class="button_class" value="Download data"/>
+				<a id="downloadAnchorTag" href=""></a>			
+			</span>		
+			<button id="help_button"><img src="images/newwindow-example.gif" alt="help link opens new browser window" />Help</button>	
+		</span>
+	</div>
+</p>
+<span>&nbsp;</span>	
+<p>
+	<div id="sidebar_wrapper" class="sidebar_class">
+		<div id="sidebar_overview" class="overview_class">
+			<select id="selected_theme_overview" title="Select a theme for the overview map" class="combo_box_class"></select>	
+			<div id="overview_legend" class="legend_class"></div>			
+		</div>
+		<div id="sidebar_detail" class="sidebar_class detail_class">
+			<select id="selected_route" title="Select a route" class="combo_box_class"></select> 
+			<br>
+			<select id="selected_theme_detail" title="Select a theme for the detail map" class="combo_box_class"></select>
+			<br>
+			<div id="detail_legend" class="legend_class"></div>
+		</div>
+	</div>
+	<div id="main_wrapper" class="section_class">
+		<div id="overview_panel" class="overview_class" >
+			<div id="overview_map"></div>	
+		</div>
+		<div id="detail_panel" class="detail_class">
+			<div id="detail_map"></div>
+			<br/>
+			<span id="radio_span_2">
+				<input type="radio" name="display_choice" id="display_table" class="detail_display_choice_class" value="table" checked="true">
+					<label for="display_table">Accessible Table (All Data)</label>
+				<input type="radio" name="display_choice" id="display_graphic" class="detail_display_choice_class" value="graphic">
+					<label for="display_graphic">Chart for Selected Theme</label>
+				
+				<input type="radio" name="display_choice" id="display_congestion_scan" class="detail_display_choice_class" value="congestion_scan">
+					<label for="display_congestion_scan">24-hour Congestion Scan for Selected Route</label>
+			</span>
+			<div id="table_div" class="table_class"></div>
+			<br />
+			<div id="graphic_div" class="graphic_class"></div>	
+			<br />
+			
+<!--
+			
+			<div id="scan_memorial_dr" class="congestion_scan_container_class">
+				<img src="jpg/Memorial_Drive.jpg" class="congestion_scan_class" alt="Congestion scan for Memorial Drive."></img>
+			</div>
+			
+			<div id="scan_middlesex_tpke" class="congestion_scan_container_class">
+				<img src="jpg/Middlesex_Turnpike.jpg" class="congestion_scan_class" alt="Congestion scan for Middlesex Turnpike."></img>
+			</div>			
+
+			<div id="scan_rte_126" class="congestion_scan_container_class">
+				<img src="jpg/Route_126_1_from_Rt_30_to_Rt_2.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 126 from Route 30 to Route 2."></img>
+				<img src="jpg/Route_126_2_from_Rt_109_to_Rt_30.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 126 from Route 109 to Route 30."></img>			
+				<img src="jpg/Route_126_3_from_RI_to_Rt_109.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 126 from the Rhode Island state line to Route 109."></img>						 
+			</div>				
+			
+			<div id="scan_rte_114" class="congestion_scan_container_class">
+				<img src="jpg/Route_114.jpg" class="congestion_scan_class" alt="Congestion scan for Route 114."></img>
+			</div>		
+			
+			<div id="scan_rte_138" class="congestion_scan_container_class">
+				<img src="jpg/Route_138.jpg" class="congestion_scan_class" alt="Congestion scan for Route 138."></img>
+			</div>	
+			
+			<div id="scan_rte_16_east" class="congestion_scan_container_class">
+				<img src="jpg/Route_16_east_1_from_Route_2_to_Route_60.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 16 east from Route 2 to Route 60."></img>
+				<img src="jpg/Route_16_east_2_from_I_95_to_Route_2.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 16 east from I 95 to Route 2."></img>					 
+			</div>			
+			
+			<div id="scan_rte_16_west" class="congestion_scan_container_class">
+				<img src="jpg/Route_16_west_1_from_Route_126N_to_I_95.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 16 west from Route 126N to I 95."></img>
+				<img src="jpg/Route_16_west_2_from_North_St_to_Route_126N.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 16 west from North Street to Route 126N."></img>					 
+			</div>			
+			
+			<div id="scan_rte_1a_far_north" class="congestion_scan_container_class">
+				<img src="jpg/Route_1A_Far_North_1_from_Cabot_St_to_Route_133.jpg" class="congestion_scan_class" alt="Congestion scan for Route 1A far north."></img>
+			</div>	
+
+			<div id="scan_rte_1a_north" class="congestion_scan_container_class">
+				<img src="jpg/Route_1A_North_1_from_Bridge_to_Cabot_St.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 1A far north from Bridge to Cabot Street."></img>
+				<img src="jpg/Route_1A_North_2_from_I_93_to_Bridge.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 1A far north from I 93 to Bridge."></img>					 
+			</div>	
+		
+			<div id="scan_rte_20" class="congestion_scan_container_class">
+				<img src="jpg/Route_20_1_from_Route_117_to_Charlesgate.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 20 from Route 117 to Charlesgate."></img>
+				<img src="jpg/Route_20_2_from_Route_27_to_Route_117.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 20 from Route 27 to Route 117."></img>				
+				<img src="jpg/Route_20_3_from_Bartlett_St_to_Route_27.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 20 from Bartlett Street to Route 27."></img>							
+			</div>	
+	
+			<div id="scan_rte_203" class="congestion_scan_container_class">
+				<img src="jpg/Route_203_Jamaicaway.jpg" class="congestion_scan_class" alt="Congestion scan for Route 203 and The Jamaicaway."></img>
+			</div>		
+			
+			<div id="scan_rte_28_north" class="congestion_scan_container_class">
+				<img src="jpg/Route_28_North_1_from_Montvale_Ave_to_Rt_125.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 28 north from Montvale Avenue to Route 125."></img>
+				<img src="jpg/Route_28_North_2_from_Levertt_Cir_to_Montvale_Ave.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 28 north from Leverett Circle to Montvale Avenue."></img>
+			</div>	
+
+			<div id="scan_rte_28_south" class="congestion_scan_container_class">
+				<img src="jpg/Route_28_South_1_from_Route_138_to_Arlington_St.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 28 south from Route 138 to Arlington Street."></img>
+				<img src="jpg/Route_28_South_2_from_High_St_to_Route_138.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 28 south from High Street to Route 138."></img>
+			</div>
+			
+			<div id="scan_rte_3a_south" class="congestion_scan_container_class">
+				<img src="jpg/Route_3A_1_from_Rt_228_to_I_93.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 3A south from Route 228 to I 93."></img>
+				<img src="jpg/Route_3A_2_from_Rt_139_to_Rt_228.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 3A south from Route 139 to Route 228."></img>
+				<img src="jpg/Route_3A_3_from_Rt_3_to_Rt_139.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 3A south from Route 3 to Route 139."></img>					 
+			</div>				
+			
+			<div id="scan_rtes_4_225" class="congestion_scan_container_class">
+				<img src="jpg/Route_4_and_225.jpg" class="congestion_scan_class" alt="Congestion scan for Routes 4 and 225."></img>
+			</div>		
+
+			<div id="scan_rte_60" class="congestion_scan_container_class">
+				<img src="jpg/Route_60.jpg" class="congestion_scan_class" alt="Congestion scan for Route 60."></img>
+			</div>	
+
+			<div id="scan_rte_62_east" class="congestion_scan_container_class">
+				<img src="jpg/Route_62_East_1_from_I_95_to_Route_127.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 62 east from I 95 to Route 127."></img>
+				<img src="jpg/Route_62_East_2_from_I_93_to_I_95.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 62 east from I 93 to I 95."></img>
+				<img src="jpg/Route_62_East_3_from_US_3_to_I_93.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 62 east from US 3 to I 93."></img>
+			</div>
+			
+			<div id="scan_rte_62_west" class="congestion_scan_container_class">
+				<img src="jpg/Route_62_West_1_from_Route_27_to_Bedford.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 62 west from Route 27 to Bedford."></img>
+				<img src="jpg/Route_62_West_2_from_I_495_t_Route_27.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 62 west from I 495 to Route 27."></img>
+			</div>
+
+			<div id="scan_rte_99" class="congestion_scan_container_class">
+				<img src="jpg/Route_99.jpg" class="congestion_scan_class" alt="Congestion scan for Route 99."></img>
+			</div>	
+			
+			<div id="scan_rte_9_east" class="congestion_scan_container_class">
+				<img src="jpg/Route_9_east_from_I_95_to_Dartmouth_St.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 9 east from I 95 to Dartmouth Street."></img>
+			</div>	
+
+			<div id="scan_rte_9_west" class="congestion_scan_container_class">
+				<img src="jpg/Route_9_west_1_from_Route_126_to_I_95.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 9 west from Route 126 to I 95."></img>
+				<img src="jpg/Route_9_west_2_from_I_495_to_Route_126.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 9 west from I 495 to Route 126."></img>					 
+			</div>			
+
+			<div id="scan_storrow_dr" class="congestion_scan_container_class">
+				<img src="jpg/Storrow_Drive.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Storrow Drive and Solders Field Road."></img>
+			</div>	
+			
+			<div id="scan_rte_1_far_north" class="congestion_scan_container_class">
+				<img src="jpg/Route_1_FarNorth_1_from_Rt_114_to_Linebrook_Rd.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 1 far north."></img>
+			</div>	
+
+			<div id="scan_rte_1_south" class="congestion_scan_container_class">
+				<img src="jpg/Route_1_South_1_from_I_495_to_I_95.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Route 1 south from I 495 to I 95."></img>
+			</div>				
+			
+			<div id="scan_rtes_3_3a_north" class="congestion_scan_container_class">
+				<img src="jpg/US_3_Route_3A_North.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Routes 3 and 3A north."></img>
+			</div>	
+			
+			<div id="scan_providence_hwy" class="congestion_scan_container_class">
+				<img src="jpg/Providence_Highway_VFW.jpg" class="congestion_scan_class" 
+				     alt="Congestion scan for Providence Highway and VFW Parkway."></img>
+			</div>				
+-->
+			
+			<div id="scan_none" class="congestion_scan_container_class">
+				A congestion scan is not currently available for the selected route.
+			</div>
+			
+		</div>
+	</div>
+	<!--  DIVs for Overview Map Route Number Popup -->
+	<div id="overview_popup" title="Popup dialog box">
+		<span id="overview_popup_close_x">&times;</span>
+		<div id="overview_popup_text"></div>
+		<!--<input id="popup_ok" type="button" value="OK"></input>-->
+	</div>
+	<span id="overview_popup_test"></span>
+	<!--  DIVs for Detail Map Route Number Popup -->
+	<div id="detail_popup" title="Popup dialog box">
+		<span id="detail_popup_close_x">&times;</span>
+		<div id="detail_popup_text"></div>
+		<!--<input id="popup_ok" type="button" value="OK"></input>-->
+	</div>
+	<span id="detail_popup_test"></span>
+</p>	
+	<!--   *************************** -->
+	<script>
+	$(document).ready(function() {
+		CTPS.cmpArtApp.init();	
+	});	
+	</script>  
+</body>
+</html>
