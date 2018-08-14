@@ -1,0 +1,1 @@
+Placeholder file used to force GitHub to create a subdirectory for image files (excluding congestion scans) for this app.
