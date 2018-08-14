@@ -1,0 +1,2 @@
+Placeholder file used to force GitHub to create a subdirectory for JPEG files for congestion scan.
+Note: This app currenly does not inlcude any congestion scans.
