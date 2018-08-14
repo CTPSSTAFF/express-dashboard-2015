@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>CMP 2015 Express Highway Performance Dashboard</title>
+	
+	<link rel="stylesheet" href="../../libs/jqueryui/jquery-ui-1.10.4/css/cupertino/jquery-ui-1.10.4.custom.min.css"/>
+	<link rel="stylesheet" href="cmpExpAppExt.css"/>	
+	
+	<script src="modernizr-2.8.2-custom.min.js"></script>
+	<script src="../../libs/jquery/jquery-1.11.1/jquery-1.11.1.min.js"></script>
+	<script src="../../libs/jqueryui/jquery-ui-1.10.4/js/jquery-ui-1.10.4.custom.min.js"></script>
+	<script src="../../libs/accessibleGrid/accessibleGrid.js"></script>  
+	<script src="../../libs/d3/d3-4.8.0/d3.js"></script>
+	<script src="../../libs/d3-tip/d3-tip-d3v4/index.js"></script>
+	<script src="CMP_Express_Routes.js"></script> 
+	<script src="CMP_Express_Themes.js"></script>
+	<script src="../../libs/openlayers/Openlayers-4.2.0/build/ol.js"></script>
+	<link rel="stylesheet" href="http://openlayers.org/en/latest/css/ol.css" type="text/css">
+	<script src="../../libs/proj4js/proj4js-2.4.3/dist/proj4-src.js"></script>
+		
+	
+	<script type="text/javascript">	 
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-39489988-1']);
+		_gaq.push(['_setDomainName', 'ctps.org']);
+		_gaq.push(['_setAllowLinker', true]);
+		_gaq.push(['_trackPageview']);
+	 
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+	 
+	<script src="cmpExpAppExt.js"></script>  
+</head>
+<body>
+	<p>
+		<div id="block-blue">
+		<img src="images/mpologo.png" alt="Boston Region MPO Logo" title="Boston Region MPO Logo">
+		</div>
+		<div id="block-right">
+				<h1>2015 Express Highway Performance Dashboard</h1>
+				<span id="radio_span_1">
+					<input type="radio" name="select_main_view" id="display_overview" class="main_display_choice_class" value="regional" checked="true">
+						<label for="display_overview">Regional Overview Map</label>
+					<input type="radio" name="select_main_view" id="display_detail" class="main_display_choice_class" value="by_route">
+						<label for="display_detail">Data by Route</label>
+				</span>
+				
+				<input type="button" id="reset_button" class="button_class" value="Reset Application"></input>
+				<span class="spanForButtonWithLink">
+					<input type="button" id="download_button" class="button_class" value="Download data"/>
+					<a id="downloadAnchorTag" href=""></a>			
+				</span>		
+				<button id="help_button"><img src="images/newwindow-example.gif" alt="help link opens new browser window" />Help</button>	
+			</span>
+		</div>
+	</p>
+	<span>&nbsp;</span>	
+	<p>
+		<div id="sidebar_wrapper" class="sidebar_class">
+			<div id="sidebar_overview" class="overview_class">
+				<select id="selected_theme_overview" title="Select a theme for the overview map" class="combo_box_class"></select>	
+				<div id="overview_legend" class="legend_class"></div>			
+			</div>
+			<div id="sidebar_detail" class="sidebar_class detail_class">
+				<select id="selected_route" title="Select a route" class="combo_box_class"></select> 
+				<br>
+				<select id="selected_theme_detail" title="Select a theme for the detail map" class="combo_box_class"></select>
+				<br>
+				<div id="detail_legend" class="legend_class"></div>
+			</div>
+		</div>
+		<div id="main_wrapper" class="section_class">
+			<div id="overview_panel" class="overview_class" >
+				<div id="overview_map"></div>	
+			</div>
+			<div id="detail_panel" class="detail_class">
+				<div id="detail_map"></div>
+				<br/>
+				<span id="radio_span_2">
+					<input type="radio" name="display_choice" id="display_table" class="detail_display_choice_class" value="table" checked="true">
+						<label for="display_table">Accessible Table (All Data)</label>
+					<input type="radio" name="display_choice" id="display_graphic" class="detail_display_choice_class" value="graphic">
+						<label for="display_graphic">Chart for Selected Theme</label>
+					<input type="radio" name="display_choice" id="display_congestion_scan" class="detail_display_choice_class" value="congestion_scan">
+						<label for="display_congestion_scan">24-Hour Congestion Scan for Selected Route</label>	
+						
+				</span>
+				<div id="table_div" class="table_class"></div>
+				<br />
+				<div id="graphic_div" class="graphic_class"></div>	
+				<br />
+<!--				
+				<div id="scan_i_290" class="congestion_scan_container_class">
+					<img src="jpg/I_290.jpg" class="congestion_scan_class" alt="Congestion scan for Interstate 290."></img>
+				</div>
+				
+				<div id="scan_i_495" class="congestion_scan_container_class">
+					<img src="jpg/I_495_1_from_I_93_to_I_95.jpg" class="congestion_scan_class" alt="Congestion scan for Interstate 495 from I 93 to I 95."></img>
+					<img src="jpg/I_495_2_from_Route_2_to_I_93.jpg" class="congestion_scan_class" alt="Congestion scan for Interstate 495 from Route 2 to I 93."></img>
+					<img src="jpg/I_495_3_from_I_90_to_Route_2.jpg" class="congestion_scan_class" alt="Congestion scan for Interstate 495 from I 90 to Route 2."></img>
+					<img src="jpg/I_495_4_from_Route 1A_to_I_90.jpg" class="congestion_scan_class" alt="Congestion scan for Interstate 495 from Route 1A to I 90."></img>
+					<img src="jpg/I_495_5_from_Route_24_to_Route_1A.jpg" class="congestion_scan_class" alt="Congestion scan for Interstate 495 from Route 24 to Route 1A."></img>
+					<img src="jpg/I_495_6_from_I_195_to_Route_24.jpg" class="congestion_scan_class" alt="Congestion scan for Interstate 495 from I 195 to Route 24."></img>
+				</div>
+				
+				<div id="scan_i_90" class="congestion_scan_container_class">
+					<img src="jpg/I_90_1_from_I_95_to_1A.jpg" class="congestion_scan_class" alt="Congestion scan for Interstate 90 from I 95 to Route 1A."></img>
+					<img src="jpg/I_90_2_from_I_495_to_I_95.jpg" class="congestion_scan_class" alt="Congestion scan for Interstate 90 from I 495 to I 95"></img>
+				</div>
+
+				<div id="scan_i_93" class="congestion_scan_container_class">
+					<img src="jpg/I_93_1_from_I_95_to_NH.jpg" class="congestion_scan_class" alt="Congestion scan for Interstate 93 from I 95 to the New Hampshire border."></img>
+					<img src="jpg/I_93_2_from_US_1_to_I_95.jpg" class="congestion_scan_class" alt="Congestion scan for Interstate 93 from US 1 to I 95."></img>
+					<img src="jpg/I_93_3_from_Route_3_to_US_1.jpg" class="congestion_scan_class" alt="Congestion scan for Interstate 93 from Route 3 to US 1."></img>
+					<img src="jpg/I_93_4_from_I_95_to_US_3.jpg" class="congestion_scan_class" alt="Congestion scan for Interstate 93 from I 95 to US 3."></img>
+				</div>		
+				
+				<div id="scan_i_95" class="congestion_scan_container_class">
+					<img src="jpg/I_95_1_from_128_to_NH.jpg" class="congestion_scan_class" alt="Congestion scan for Interstate 95 from Route 128 to the New Hampshire border."></img>
+					<img src="jpg/I_95_2_from_Route_2_to_Route_128.jpg" class="congestion_scan_class" alt="Congestion scan for Interstate 95 from Route 2 to Route 128."></img>
+					<img src="jpg/I_95_3_from_I_93_to_Route_2.jpg" class="congestion_scan_class" alt="Congestion scan for Interstate 95 from I 93 to Route 2."></img>
+					<img src="jpg/I_95_4_from_I_495_to_I_93.jpg" class="congestion_scan_class" alt="Congestion scan for Intersate 95 from I 495 to I 93."></img>
+					<img src="jpg/I_95_5_from_RI_to_I_495.jpg" class="congestion_scan_class" alt="Congestion scan for Interstate 95 from the Rhode Island border to I 495."></img>	
+				</div>
+				
+				<div id="scan_sr_128" class="congestion_scan_container_class">
+					<img src="jpg/SR_128.jpg" class="congestion_scan_class" alt="Congestion scan for Route 128."></img>
+				</div>
+				
+				<div id="scan_sr_24" class="congestion_scan_container_class">
+					<img src="jpg/SR_24.jpg" class="congestion_scan_class" alt="Congestion scan for Route 24."></img>
+				</div>
+
+				<div id="scan_sr_2" class="congestion_scan_container_class">
+					<img src="jpg/SR_2_1 _from_Alewife_to_I_95.jpg" class="congestion_scan_class" alt="Congestion scan for Route 2 from Alewife to I 95."></img>
+					<img src="jpg/SR_2_2_from_I_95_to_I_495.jpg" class="congestion_scan_class" alt="Congestion scan for Route 2 from I 95 to I 495."></img>
+					<img src="jpg/SR_2_3_from_I_495_to_I_190.jpg" class="congestion_scan_class" alt="Congestion scan for Route 2 from Route I 495 to I 190."></img>
+				</div>	
+
+				<div id="scan_sr_3" class="congestion_scan_container_class">
+					<img src="jpg/SR_3_1_from_3A_to_I_93.jpg" class="congestion_scan_class" alt="Congestion scan for Route 3 from Route 3A to I 93."></img>
+					<img src="jpg/SR_3_2_from_US_6_to_3A.jpg" class="congestion_scan_class" alt="Congestion scan for Route 3 from US 6 to Route 3A."></img>
+				</div>		
+
+				<div id="scan_us_1" class="congestion_scan_container_class">
+					<img src="jpg/US_1.jpg" class="congestion_scan_class" alt="Congestion scan for US 1."></img>
+				</div>				
+				
+				<div id="scan_us_3_north" class="congestion_scan_container_class">
+					<img src="jpg/US_3_North.jpg" class="congestion_scan_class" alt="Congestion scan for US route 3 north."></img>
+				</div>
+-->				
+				<div id="scan_none" class="congestion_scan_container_class">
+					A congestion scan is not currently available for the selected route.
+				</div>
+			</div>
+		</div>
+		<!--  DIVs for Overview Map Route Number Popup -->
+		<div id="overview_popup" title="Popup dialog box">
+			<span id="overview_popup_close_x">&times;</span>
+			<div id="overview_popup_text"></div>
+		</div>
+		<span id="overview_popup_test"></span>	
+		<!--  DIVs for Detail Map Route Number Popup -->
+		<div id="detail_popup" title="Popup dialog box">
+			<span id="detail_popup_close_x">&times;</span>
+			<div id="detail_popup_text"></div>
+		</div>
+		<span id="detail_popup_test"></span>
+	</p>		
+		<!--   *************************** -->		
+	<script>
+	$(document).ready(function() {
+		CTPS.cmpExpApp.init();
+	});	
+	</script>
+	
+</body>
+</html>
