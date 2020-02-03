@@ -49,7 +49,8 @@ var CTPS = {};
 // Application object.
 CTPS.cmpExpApp = {};
 
-CTPS.cmpExpApp.szServerRoot = 'http://www.ctps.org:8080/geoserver/'; 
+CTPS.cmpExpApp.szServerRoot = location.protocol + '//' + location.hostname;
+CTPS.cmpExpApp.szServerRoot += (location.hostname.includes('appsrvr3')) ? ':8080/geoserver/wfs' : '/maploc/wfs';
 CTPS.cmpExpApp.szWMSserverRoot = CTPS.cmpExpApp.szServerRoot + '/wms'; 
 CTPS.cmpExpApp.szWFSserverRoot = CTPS.cmpExpApp.szServerRoot + '/wfs';
 
