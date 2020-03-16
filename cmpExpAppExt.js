@@ -269,6 +269,7 @@ CTPS.cmpExpApp.createChart = function() {
 					.attr("dy", ".71em")
 					.style("text-anchor", "middle")
 					.attr("fill", "#000")
+                    .attr("id", "y_axis_text") 
 					.text(yAxisText);
 		};	
 		svg.select(".x-axis")
@@ -281,6 +282,7 @@ CTPS.cmpExpApp.createChart = function() {
 				.duration(500)
 				.ease(d3.easeLinear)
 				.call(yAxis);
+        d3.select("#y_axis_text").text(yAxisText);
 	};
 	
 	// Getter/Setter functions
